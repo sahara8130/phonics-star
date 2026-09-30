@@ -29,13 +29,13 @@
         <div class="filters" id="filters"></div><div class="phoneme-grid" id="phonemeGrid"></div>
       </div>
       <div class="view" id="words">
-        <div class="eyebrow">第 2 站 · 合成声音</div><h2 class="headline">把音标连起来，读出整个单词</h2><p class="lead">先分段慢读，再连起来读。点击下方任意单词，可以换一张拼读卡。</p>
+        <div class="eyebrow">第 2 站 · 人教版七上词汇</div><h2 class="headline">把音标连起来，读出整个单词</h2><p class="lead">按 2024 新版人教版七年级上册整理。选择正在学习的单元，先分段慢读，再连起来读。</p>
         <div class="learning-card"><div class="word" id="wordText"></div><div class="trans" id="wordIpa"></div><div class="meaning" id="wordMeaning"></div><div class="segments" id="segments"></div><div class="actions"><button class="btn primary" id="playWord">🔊 听标准发音</button><button class="btn secondary" id="recordWord">🎙️ 开始跟读</button></div><div class="rec-status" id="recStatus">准备好后，点击“开始跟读”</div><div class="permission">跟读功能需要允许浏览器使用麦克风；识别结果仅用于本次练习。</div></div>
-        <div class="word-list" id="wordList"></div>
+        <div class="filters" id="unitFilters"></div><div class="word-list" id="wordList"></div>
       </div>
       <div class="view" id="quiz">
         <div class="eyebrow">第 3 站 · 听音辨词</div><h2 class="headline">看到音标，选出正确单词</h2><p class="lead">先试着自己拼读；不确定时，可以点小喇叭听一遍。</p>
-        <div class="quiz"><div class="quiz-top"><span>本轮 <b id="qIndex">1</b>/10</span><span>得分 <b id="score">0</b></span></div><div class="quiz-ipa" id="quizIpa"></div><div class="actions"><button class="btn secondary" id="playQuiz">🔊 听一遍</button></div><div class="options" id="options"></div><div class="feedback" id="feedback"></div><button class="btn primary next hidden" id="nextBtn">下一题</button></div>
+        <div class="quiz"><div class="quiz-top"><span>本轮 <b id="qIndex">1</b>/<b id="qTotal">10</b></span><span>得分 <b id="score">0</b></span></div><div class="quiz-ipa" id="quizIpa"></div><div class="actions"><button class="btn secondary" id="playQuiz">🔊 听一遍</button></div><div class="options" id="options"></div><div class="feedback" id="feedback"></div><button class="btn primary next hidden" id="nextBtn">下一题</button></div>
       </div>
     </section>
   </div>
@@ -47,12 +47,211 @@ const phonemes=[
  {g:'清辅音',s:'p',e:'pen'}, {g:'清辅音',s:'t',e:'tea'}, {g:'清辅音',s:'k',e:'key'}, {g:'清辅音',s:'f',e:'fish'}, {g:'清辅音',s:'θ',e:'three'}, {g:'清辅音',s:'s',e:'sun'}, {g:'清辅音',s:'ʃ',e:'ship'}, {g:'清辅音',s:'tʃ',e:'chair'}, {g:'清辅音',s:'tr',e:'tree'}, {g:'清辅音',s:'ts',e:'cats'},
  {g:'浊辅音',s:'b',e:'boy'}, {g:'浊辅音',s:'d',e:'day'}, {g:'浊辅音',s:'g',e:'go'}, {g:'浊辅音',s:'v',e:'very'}, {g:'浊辅音',s:'ð',e:'this'}, {g:'浊辅音',s:'z',e:'zoo'}, {g:'浊辅音',s:'ʒ',e:'usual'}, {g:'浊辅音',s:'dʒ',e:'jeep'}, {g:'浊辅音',s:'dr',e:'dress'}, {g:'浊辅音',s:'dz',e:'beds'},
  {g:'其他辅音',s:'m',e:'map'}, {g:'其他辅音',s:'n',e:'name'}, {g:'其他辅音',s:'ŋ',e:'sing'}, {g:'其他辅音',s:'h',e:'hat'}, {g:'其他辅音',s:'l',e:'leg'}, {g:'其他辅音',s:'r',e:'red'}, {g:'其他辅音',s:'j',e:'yes'}, {g:'其他辅音',s:'w',e:'we'}];
-const words=[
+const sampleWords=[
  ['family','/ˈfæməli/','家庭',['fæ','mə','li']],['school','/skuːl/','学校',['s','k','uː','l']],['student','/ˈstjuːdnt/','学生',['st','juː','dnt']],['teacher','/ˈtiːtʃə/','老师',['tiː','tʃə']],['friend','/frend/','朋友',['f','r','e','n','d']],['English','/ˈɪŋɡlɪʃ/','英语',['ɪŋ','ɡlɪʃ']],['morning','/ˈmɔːnɪŋ/','早晨',['mɔː','nɪŋ']],['picture','/ˈpɪktʃə/','图片',['pɪk','tʃə']],['library','/ˈlaɪbrəri/','图书馆',['laɪ','brə','ri']],['computer','/kəmˈpjuːtə/','电脑',['kəm','pjuː','tə']],
  ['favorite','/ˈfeɪvərɪt/','最喜欢的',['feɪ','və','rɪt']],['healthy','/ˈhelθi/','健康的',['hel','θi']],['breakfast','/ˈbrekfəst/','早餐',['brek','fəst']],['vegetable','/ˈvedʒtəbl/','蔬菜',['vedʒ','tə','bl']],['birthday','/ˈbɜːθdeɪ/','生日',['bɜːθ','deɪ']],['January','/ˈdʒænjuəri/','一月',['dʒæn','juə','ri']],['interesting','/ˈɪntrəstɪŋ/','有趣的',['ɪn','trə','stɪŋ']],['difficult','/ˈdɪfɪkəlt/','困难的',['dɪ','fɪ','kəlt']],['subject','/ˈsʌbdʒɪkt/','学科',['sʌb','dʒɪkt']],['science','/ˈsaɪəns/','科学',['saɪ','əns']],
  ['music','/ˈmjuːzɪk/','音乐',['mjuː','zɪk']],['history','/ˈhɪstri/','历史',['hɪs','tri']],['because','/bɪˈkɒz/','因为',['bɪ','kɒz']],['always','/ˈɔːlweɪz/','总是',['ɔːl','weɪz']],['usually','/ˈjuːʒuəli/','通常',['juː','ʒuə','li']],['basketball','/ˈbɑːskɪtbɔːl/','篮球',['bɑː','skɪt','bɔːl']],['soccer','/ˈsɒkə/','足球',['sɒ','kə']],['telephone','/ˈtelɪfəʊn/','电话',['tel','ɪ','fəʊn']],['welcome','/ˈwelkəm/','欢迎',['wel','kəm']],['daughter','/ˈdɔːtə/','女儿',['dɔː','tə']],
  ['parents','/ˈpeərənts/','父母',['peə','rənts']],['purple','/ˈpɜːpl/','紫色',['pɜː','pl']],['orange','/ˈɒrɪndʒ/','橙色',['ɒ','rɪndʒ']],['question','/ˈkwestʃən/','问题',['kwes','tʃən']],['answer','/ˈɑːnsə/','回答',['ɑːn','sə']],['dictionary','/ˈdɪkʃənri/','词典',['dɪk','ʃən','ri']],['classroom','/ˈklɑːsruːm/','教室',['klɑːs','ruːm']],['weekend','/ˌwiːkˈend/','周末',['wiːk','end']],['homework','/ˈhəʊmwɜːk/','家庭作业',['həʊm','wɜːk']],['festival','/ˈfestɪvl/','节日',['fes','tɪ','vl']]];
-let currentWord=0, quizItems=[], qi=0, score=0, answered=false;
+const pepRaw=`
+预备1|unit|ˈjuː.nɪt|单元
+预备1|section|ˈsek.ʃən|部分；地区
+预备1|greet|ɡriːt|招呼；问候
+预备1|everyone|ˈev.ri.wʌn|每人；所有人
+预备1|start|stɑːt|开始；着手
+预备1|conversation|ˌkɒn.vəˈseɪ.ʃən|谈话；交谈
+预备1|spell|spel|拼写
+预备1|bell|bel|铃声；钟声
+预备2|bottle|ˈbɒt.əl|瓶子
+预备2|eraser|ɪˈreɪ.zə|橡皮
+预备2|key|kiː|钥匙；关键
+预备2|thing|θɪŋ|东西；事情
+预备2|need|niːd|需要
+预备3|fun|fʌn|乐趣；有趣的
+预备3|yard|jɑːd|院子；园圃
+预备3|carrot|ˈkær.ət|胡萝卜
+预备3|goose|ɡuːs|鹅
+预备3|count|kaʊnt|数数
+预备3|another|əˈnʌð.ə|另一；又一
+预备3|else|els|其他的；别的
+预备3|circle|ˈsɜː.kəl|圈出；圆圈
+Unit 1|make friends|meɪk.frendz|交朋友
+Unit 1|get to know|ɡet.tə.nəʊ|认识；了解
+Unit 1|each|iːtʃ|每个；各自
+Unit 1|other|ˈʌð.ə|另外的；其他的
+Unit 1|full|fʊl|完整的；满的
+Unit 1|grade|ɡreɪd|年级；等级
+Unit 1|classmate|ˈklɑːs.meɪt|同班同学
+Unit 1|mistake|mɪˈsteɪk|错误；失误
+Unit 1|country|ˈkʌn.tri|国家
+Unit 1|same|seɪm|相同的
+Unit 1|twin|twɪn|双胞胎之一
+Unit 1|both|bəʊθ|两个；两个都
+Unit 1|band|bænd|乐队
+Unit 1|pot|pɒt|锅
+Unit 1|tofu|ˈtəʊ.fuː|豆腐
+Unit 1|parrot|ˈpær.ət|鹦鹉
+Unit 1|guitar|ɡɪˈtɑː|吉他
+Unit 1|tennis|ˈten.ɪs|网球
+Unit 1|post|pəʊst|帖子；邮寄
+Unit 1|even|ˈiː.vən|甚至
+Unit 1|would|wʊd|想；将会
+Unit 1|information|ˌɪn.fəˈmeɪ.ʃən|信息；消息
+Unit 1|hobby|ˈhɒb.i|业余爱好
+Unit 1|Australia|ɒˈstreɪ.li.ə|澳大利亚
+Unit 1|Singapore|ˌsɪŋ.əˈpɔː|新加坡
+Unit 2|mean|miːn|意思是；打算
+Unit 2|husband|ˈhʌz.bənd|丈夫
+Unit 2|bat|bæt|球棒；球拍
+Unit 2|together|təˈɡeð.ə|在一起；共同
+Unit 2|spend|spend|花费
+Unit 2|really|ˈrɪə.li|非常；真正地
+Unit 2|activity|ækˈtɪv.ə.ti|活动
+Unit 2|chess|tʃes|国际象棋
+Unit 2|funny|ˈfʌn.i|好笑的；奇怪的
+Unit 2|laugh|lɑːf|笑；发笑
+Unit 2|different|ˈdɪf.ər.ənt|不同的
+Unit 2|violin|ˌvaɪ.əˈlɪn|小提琴
+Unit 2|pink|pɪŋk|粉红色的
+Unit 2|hat|hæt|帽子
+Unit 2|handsome|ˈhæn.səm|英俊的
+Unit 2|knee|niː|膝盖
+Unit 2|grandchild|ˈɡræn.tʃaɪld|孙子；孙女
+Unit 2|son|sʌn|儿子
+Unit 2|hike|haɪk|远足；徒步旅行
+Unit 3|hall|hɔːl|礼堂；大厅
+Unit 3|dining hall|ˈdaɪ.nɪŋ.hɔːl|餐厅
+Unit 3|building|ˈbɪl.dɪŋ|建筑物；房子
+Unit 3|across|əˈkrɒs|穿过；在对面
+Unit 3|field|fiːld|场地；田地
+Unit 3|gym|dʒɪm|体育馆；健身房
+Unit 3|office|ˈɒf.ɪs|办公室
+Unit 3|large|lɑːdʒ|大的
+Unit 3|special|ˈspeʃ.əl|特别的
+Unit 3|smart|smɑːt|智能的；聪明的
+Unit 3|whiteboard|ˈwaɪt.bɔːd|白板
+Unit 3|important|ɪmˈpɔː.tənt|重要的
+Unit 3|notice|ˈnəʊ.tɪs|通知；注意
+Unit 3|locker|ˈlɒk.ə|寄物柜
+Unit 3|drawer|drɔː|抽屉
+Unit 3|corner|ˈkɔː.nə|角；墙角
+Unit 3|bookcase|ˈbʊk.keɪs|书架；书柜
+Unit 3|screen|skriːn|屏幕；银幕
+Unit 3|modern|ˈmɒd.ən|现代的
+Unit 3|amazing|əˈmeɪ.zɪŋ|令人惊奇的
+Unit 3|raise|reɪz|使升高；提高
+Unit 3|flag|flæɡ|旗；旗帜
+Unit 3|most|məʊst|大多数；最
+Unit 3|change|tʃeɪndʒ|改变；变化
+Unit 3|seat|siːt|座位
+Unit 3|delicious|dɪˈlɪʃ.əs|美味的
+Unit 3|similar|ˈsɪm.ə.lə|类似的；相像的
+Unit 3|sound|saʊnd|听起来；声音
+Unit 4|biology|baɪˈɒl.ə.dʒi|生物学
+Unit 4|geography|dʒiˈɒɡ.rə.fi|地理
+Unit 4|history|ˈhɪs.tər.i|历史
+Unit 4|boring|ˈbɔː.rɪŋ|乏味的
+Unit 4|useful|ˈjuːs.fəl|有用的
+Unit 4|exciting|ɪkˈsaɪ.tɪŋ|令人兴奋的
+Unit 4|past|pɑːst|过去
+Unit 4|number|ˈnʌm.bə|数字；号码
+Unit 4|reason|ˈriː.zən|原因；理由
+Unit 4|remember|rɪˈmem.bə|记住；记起
+Unit 4|French|frentʃ|法语；法国的
+Unit 4|excellent|ˈek.səl.ənt|优秀的；极好的
+Unit 4|instrument|ˈɪn.strə.mənt|器械；乐器
+Unit 4|singer|ˈsɪŋ.ə|歌手
+Unit 4|future|ˈfjuː.tʃə|将来；未来
+Unit 4|term|tɜːm|学期
+Unit 4|work out|wɜːk.aʊt|计算出；解决
+Unit 4|problem|ˈprɒb.ləm|难题；困难
+Unit 4|magic|ˈmædʒ.ɪk|魔法；有魔力的
+Unit 4|life|laɪf|生活；生命
+Unit 4|scientist|ˈsaɪ.ən.tɪst|科学家
+Unit 5|club|klʌb|俱乐部；社团
+Unit 5|join|dʒɔɪn|参加；加入
+Unit 5|choose|tʃuːz|选择；挑选
+Unit 5|drama|ˈdrɑː.mə|戏剧；戏剧表演
+Unit 5|feeling|ˈfiː.lɪŋ|感觉；情感
+Unit 5|news|njuːz|消息；新闻
+Unit 5|musical|ˈmjuː.zɪ.kəl|音乐的
+Unit 5|exactly|ɪɡˈzækt.li|正是如此；准确地
+Unit 5|drum|drʌm|鼓
+Unit 5|ability|əˈbɪl.ə.ti|能力；才能
+Unit 5|paint|peɪnt|用颜料画
+Unit 5|climb|klaɪm|攀登；爬
+Unit 5|more|mɔː|更多的
+Unit 5|act|ækt|扮演；行动
+Unit 5|interested|ˈɪn.trəs.tɪd|感兴趣的
+Unit 5|nature|ˈneɪ.tʃə|大自然
+Unit 5|beef|biːf|牛肉
+Unit 5|soon|suːn|不久；很快
+Unit 5|than|ðæn|比
+Unit 5|mind|maɪnd|头脑；心思
+Unit 5|fall|fɔːl|进入；跌倒；秋天
+Unit 5|collect|kəˈlekt|收集；采集
+Unit 5|insect|ˈɪn.sekt|昆虫
+Unit 5|discover|dɪˈskʌv.ə|发现；发觉
+Unit 5|wildlife|ˈwaɪld.laɪf|野生动物
+Unit 6|shower|ˈʃaʊ.ə|淋浴
+Unit 6|get dressed|ɡet.drest|穿衣服
+Unit 6|brush|brʌʃ|刷；刷子
+Unit 6|tooth|tuːθ|牙齿
+Unit 6|duty|ˈdjuː.ti|值班；职责
+Unit 6|usually|ˈjuː.ʒu.ə.li|通常地
+Unit 6|get up|ɡet.ʌp|起床
+Unit 6|reporter|rɪˈpɔː.tə|记者
+Unit 6|around|əˈraʊnd|大约；环绕
+Unit 6|homework|ˈhəʊm.wɜːk|家庭作业
+Unit 6|saying|ˈseɪ.ɪŋ|谚语；格言
+Unit 6|rise|raɪz|起床；升起；增长
+Unit 6|stay|steɪ|停留；待
+Unit 6|routine|ruːˈtiːn|常规
+Unit 6|restaurant|ˈres.tər.ɒnt|餐馆；餐厅
+Unit 6|housework|ˈhaʊs.wɜːk|家务劳动
+Unit 6|while|waɪl|一段时间；当……时
+Unit 6|weekend|ˌwiːkˈend|周末
+Unit 6|daily|ˈdeɪ.li|每日的；日常的
+Unit 6|break|breɪk|休息；间断
+Unit 6|Finnish|ˈfɪn.ɪʃ|芬兰语；芬兰的
+Unit 6|finish|ˈfɪn.ɪʃ|结束；完成
+Unit 6|hockey|ˈhɒk.i|曲棍球
+Unit 6|already|ɔːlˈred.i|已经；早已
+Unit 6|dark|dɑːk|昏暗的；深色的
+Unit 6|outside|ˌaʊtˈsaɪd|在外面；外面的
+Unit 6|part|pɑːt|部分
+Unit 6|everyday|ˈev.ri.deɪ|每天的；日常的
+Unit 6|prepare|prɪˈpeə|准备
+Unit 7|celebrate|ˈsel.ə.breɪt|庆祝；庆贺
+Unit 7|surprise|səˈpraɪz|惊奇；使意外
+Unit 7|something|ˈsʌm.θɪŋ|某事；某物
+Unit 7|sale|seɪl|出售；销售
+Unit 7|kilo|ˈkiː.ləʊ|千克；公斤
+Unit 7|yogurt|ˈjɒɡ.ət|酸奶
+Unit 7|total|ˈtəʊ.təl|总数；总的
+Unit 7|price|praɪs|价格
+Unit 7|balloon|bəˈluːn|气球
+Unit 7|chocolate|ˈtʃɒk.lət|巧克力
+Unit 7|pizza|ˈpiːt.sə|比萨饼
+Unit 7|list|lɪst|列表；清单
+Unit 7|own|əʊn|自己的
+Unit 7|example|ɪɡˈzɑːm.pəl|例子；范例
+Unit 7|language|ˈlæŋ.ɡwɪdʒ|语言
+Unit 7|international|ˌɪn.təˈnæʃ.ən.əl|国际的
+Unit 7|mark|mɑːk|做记号；纪念
+Unit 7|date|deɪt|日期；日子
+Unit 7|national|ˈnæʃ.ən.əl|国家的；民族的
+Unit 7|found|faʊnd|创建；创立
+Unit 7|meaningful|ˈmiː.nɪŋ.fəl|重要的；有意义的
+Unit 7|symbol|ˈsɪm.bəl|象征；符号
+Unit 7|village|ˈvɪl.ɪdʒ|村庄；村镇
+Unit 7|grow|ɡrəʊ|成长；增长
+Unit 7|blow|bləʊ|吹；刮
+Unit 7|enjoy|ɪnˈdʒɔɪ|享受；喜欢
+Unit 7|height|haɪt|身高；高度
+Unit 7|later|ˈleɪ.tə|以后；后来
+Unit 7|whom|huːm|谁；什么人`;
+const words=pepRaw.trim().split('\n').map(row=>{const [unit,word,ipa,meaning]=row.split('|');return [word,`/${ipa}/`,meaning,ipa.split('.'),unit]});
+let currentWord=0, activeUnit='全部', quizItems=[], qi=0, score=0, answered=false;
 const saved=JSON.parse(localStorage.getItem('phonicsProgress')||'{"today":0}');
 function speak(text,rate=.78){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=rate;const vs=speechSynthesis.getVoices();u.voice=vs.find(v=>v.lang==='en-US')||vs.find(v=>v.lang.startsWith('en'))||null;speechSynthesis.speak(u);markLearned()}
 function markLearned(){saved.today=Math.min(99,(saved.today||0)+1);localStorage.setItem('phonicsProgress',JSON.stringify(saved));updateProgress()}
@@ -61,15 +260,15 @@ document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>{document.querySelect
 const groups=['全部','单元音','双元音','清辅音','浊辅音','其他辅音'];
 function renderSounds(group='全部'){document.querySelector('#filters').innerHTML=groups.map(g=>`<button class="chip ${g===group?'active':''}" data-g="${g}">${g}</button>`).join('');document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>renderSounds(b.dataset.g));const list=group==='全部'?phonemes:phonemes.filter(x=>x.g===group);document.querySelector('#phonemeGrid').innerHTML=list.map((p,i)=>`<button class="phoneme" data-word="${p.e}" aria-label="播放音标 ${p.s}，例词 ${p.e}"><div class="ipa">/${p.s}/</div><div class="example">${p.e}</div><div class="mini-play">🔊 点击听音</div></button>`).join('');document.querySelectorAll('.phoneme').forEach(b=>b.onclick=()=>speak(b.dataset.word,.65))}
 function showWord(i){currentWord=i;const w=words[i];document.querySelector('#wordText').textContent=w[0];document.querySelector('#wordIpa').textContent=w[1];document.querySelector('#wordMeaning').textContent=w[2];document.querySelector('#segments').innerHTML=w[3].map(s=>`<span class="seg">${s}</span>`).join('');document.querySelector('#recStatus').textContent='准备好后，点击“开始跟读”'}
-function renderWords(){document.querySelector('#wordList').innerHTML=words.map((w,i)=>`<button class="word-row" data-i="${i}"><strong>${w[0]}</strong><small>${w[1]} · ${w[2]}</small></button>`).join('');document.querySelectorAll('.word-row').forEach(b=>b.onclick=()=>{showWord(+b.dataset.i);document.querySelector('.learning-card').scrollIntoView({behavior:'smooth',block:'center'})});showWord(0)}
+function renderWords(){const units=['全部','预备1','预备2','预备3','Unit 1','Unit 2','Unit 3','Unit 4','Unit 5','Unit 6','Unit 7'];document.querySelector('#unitFilters').innerHTML=units.map(u=>`<button class="chip ${u===activeUnit?'active':''}" data-u="${u}">${u}</button>`).join('');document.querySelectorAll('#unitFilters .chip').forEach(b=>b.onclick=()=>{activeUnit=b.dataset.u;renderWords();const first=words.findIndex(w=>activeUnit==='全部'||w[4]===activeUnit);showWord(first);});const list=words.map((w,i)=>({w,i})).filter(x=>activeUnit==='全部'||x.w[4]===activeUnit);document.querySelector('#wordList').innerHTML=list.map(({w,i})=>`<button class="word-row" data-i="${i}"><strong>${w[0]}</strong><small>${w[4]} · ${w[1]} · ${w[2]}</small></button>`).join('');document.querySelectorAll('.word-row').forEach(b=>b.onclick=()=>{showWord(+b.dataset.i);document.querySelector('.learning-card').scrollIntoView({behavior:'smooth',block:'center'})});if(list.length&&!list.some(x=>x.i===currentWord))showWord(list[0].i)}
 document.querySelector('#playWord').onclick=()=>speak(words[currentWord][0]);
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
 document.querySelector('#recordWord').onclick=()=>{const btn=document.querySelector('#recordWord'),status=document.querySelector('#recStatus');if(!SpeechRecognition){status.textContent='当前浏览器暂不支持语音识别，建议使用最新版 Chrome 或 Edge。';return}const r=new SpeechRecognition();r.lang='en-US';r.interimResults=false;btn.classList.add('recording');btn.textContent='● 正在听，请读…';status.textContent='请大声读出：'+words[currentWord][0];r.onresult=e=>{const heard=e.results[0][0].transcript.toLowerCase().replace(/[^a-z]/g,'');const target=words[currentWord][0].toLowerCase().replace(/[^a-z]/g,'');const ok=heard===target||heard.includes(target);status.textContent=ok?'太棒了！识别到 “'+e.results[0][0].transcript+'” 🌟':'听到的是 “'+e.results[0][0].transcript+'”。再听一遍，然后慢慢读。';if(ok)markLearned()};r.onerror=e=>{status.textContent=e.error==='not-allowed'?'请先允许使用麦克风，再试一次。':'没有听清，请靠近麦克风再试一次。'};r.onend=()=>{btn.classList.remove('recording');btn.textContent='🎙️ 开始跟读'};r.start()};
 function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
-function startQuiz(){quizItems=shuffle(words).slice(0,10);qi=0;score=0;document.querySelector('#score').textContent=0;showQuestion()}
-function showQuestion(){answered=false;const q=quizItems[qi];document.querySelector('#qIndex').textContent=qi+1;document.querySelector('#quizIpa').textContent=q[1];document.querySelector('#feedback').textContent='';document.querySelector('#nextBtn').classList.add('hidden');const others=shuffle(words.filter(w=>w[0]!==q[0])).slice(0,3);const opts=shuffle([q,...others]);document.querySelector('#options').innerHTML=opts.map(w=>`<button class="option" data-word="${w[0]}">${w[0]}<br><small>${w[2]}</small></button>`).join('');document.querySelectorAll('.option').forEach(b=>b.onclick=()=>choose(b,q[0]))}
+function startQuiz(){const pool=activeUnit==='全部'?words:words.filter(w=>w[4]===activeUnit);quizItems=shuffle(pool).slice(0,Math.min(10,pool.length));qi=0;score=0;document.querySelector('#score').textContent=0;document.querySelector('#qTotal').textContent=quizItems.length;showQuestion()}
+function showQuestion(){answered=false;const q=quizItems[qi];document.querySelector('#qIndex').textContent=qi+1;document.querySelector('#quizIpa').textContent=q[1];document.querySelector('#feedback').textContent='';document.querySelector('#nextBtn').classList.add('hidden');const pool=activeUnit==='全部'?words:words.filter(w=>w[4]===activeUnit);const others=shuffle(pool.filter(w=>w[0]!==q[0])).slice(0,3);const opts=shuffle([q,...others]);document.querySelector('#options').innerHTML=opts.map(w=>`<button class="option" data-word="${w[0]}">${w[0]}<br><small>${w[2]}</small></button>`).join('');document.querySelectorAll('.option').forEach(b=>b.onclick=()=>choose(b,q[0]))}
 function choose(btn,target){if(answered)return;answered=true;document.querySelectorAll('.option').forEach(b=>{if(b.dataset.word===target)b.classList.add('correct')});if(btn.dataset.word===target){score++;document.querySelector('#score').textContent=score;document.querySelector('#feedback').textContent='答对了！你已经能从音标找到单词啦 🎉';markLearned()}else{btn.classList.add('wrong');document.querySelector('#feedback').textContent='差一点！正确答案是 '+target+'。点喇叭再听一遍。'}document.querySelector('#nextBtn').textContent=qi===9?'查看成绩':'下一题';document.querySelector('#nextBtn').classList.remove('hidden')}
-document.querySelector('#playQuiz').onclick=()=>speak(quizItems[qi][0]);document.querySelector('#nextBtn').onclick=()=>{if(qi<9){qi++;showQuestion()}else{document.querySelector('#feedback').textContent=`本轮完成：${score}/10！${score>=8?'你已经是拼读小达人了！':'把读错的词再听一遍，下次一定更好！'}`;document.querySelector('#nextBtn').textContent='再来一轮';document.querySelector('#nextBtn').onclick=()=>startQuiz()}};
+document.querySelector('#playQuiz').onclick=()=>speak(quizItems[qi][0]);document.querySelector('#nextBtn').onclick=()=>{if(qi<quizItems.length-1){qi++;showQuestion()}else{document.querySelector('#feedback').textContent=`本轮完成：${score}/${quizItems.length}！${score>=Math.ceil(quizItems.length*.8)?'你已经是拼读小达人了！':'把读错的词再听一遍，下次一定更好！'}`;document.querySelector('#nextBtn').textContent='再来一轮';document.querySelector('#nextBtn').onclick=()=>startQuiz()}};
 renderSounds();renderWords();updateProgress();
 </script>
 </body>
